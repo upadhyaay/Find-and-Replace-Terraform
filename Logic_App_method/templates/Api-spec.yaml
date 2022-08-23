@@ -1,0 +1,28 @@
+openapi: 3.0.1
+info:
+  title: FindandReplace
+  description: ''
+  version: '1.0'
+servers:
+  - url: https://deloitte-test-apim-01.azure-api.net/assessment
+paths:
+  /findandreplace:
+    post:
+      summary: FindandReplace
+      operationId: findandreplace
+      responses:
+        '200':
+          description: '' 
+components:
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      name: Sub-key
+      in: header
+    apiKeyQuery:
+      type: apiKey
+      name: Sub-key
+      in: query
+security:
+  - apiKeyHeader: [ ]
+  - apiKeyQuery: [ ]
