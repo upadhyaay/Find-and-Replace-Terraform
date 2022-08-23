@@ -34,8 +34,8 @@ After Cloning the repo, directory will look something like this :-
 |   \---templates
 |           Api-policy.xml
 |           Api-spec.yaml
-|           parameters.json
-|           template.json
+|           lapp_parameters.json
+|           lapp_template.json
 ```
 
 #### Process
