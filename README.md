@@ -48,17 +48,19 @@ After Cloning the repo, directory will look something like this :-
 |   |   apim.tfvars
 |   |   main.tf
 |   |   variables.tf
+|   |   README.md
 |   |
 |   \---templates
 |           Api-policy.xml
 |           Api-spec.yaml
-|           parameters.json
-|           template.json
+|           lapp_parameters.json
+|           lapp_template.json
 |
 \---Web App method
         main.tf
         variables.tf
         webapp.tfvars
+        README.md
 ```
 ## Git clone
 
