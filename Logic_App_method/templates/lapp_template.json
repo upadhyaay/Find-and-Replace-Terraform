@@ -1,0 +1,175 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_deloitte_test_lapp_01_name": {
+            "defaultValue": "Deloitte-Test-Lapp-01",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_deloitte_test_lapp_01_name')]",
+            "location": "centralus",
+            "properties": {
+                "state": "Disabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "triggers": {
+                        "manual": {
+                            "type": "Request",
+                            "kind": "Http",
+                            "inputs": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Filter_array": {
+                            "runAfter": {
+                                "Temporary_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Query",
+                            "inputs": {
+                                "from": "@variables('words')",
+                                "where": "@contains(triggerBody(), item()?['word'])"
+                            }
+                        },
+                        "For_each": {
+                            "foreach": "@body('Filter_array')",
+                            "actions": {
+                                "Condition": {
+                                    "actions": {
+                                        "Set_temporary_variable_value": {
+                                            "runAfter": {},
+                                            "type": "SetVariable",
+                                            "inputs": {
+                                                "name": "temp",
+                                                "value": "@{replace(variables('output1'),item()?['word'],item()?['replacement'])}"
+                                            }
+                                        },
+                                        "Set_value_of_Input_string_after_replacement": {
+                                            "runAfter": {
+                                                "Set_temporary_variable_value": [
+                                                    "Succeeded"
+                                                ]
+                                            },
+                                            "type": "SetVariable",
+                                            "inputs": {
+                                                "name": "output1",
+                                                "value": "@variables('temp')"
+                                            }
+                                        }
+                                    },
+                                    "runAfter": {},
+                                    "else": {
+                                        "actions": {
+                                            "Set_Input_string_value": {
+                                                "runAfter": {},
+                                                "type": "SetVariable",
+                                                "inputs": {
+                                                    "name": "output1",
+                                                    "value": "@{triggerBody()}"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "expression": {
+                                        "and": [
+                                            {
+                                                "contains": [
+                                                    "@triggerBody()",
+                                                    "@item()?['word']"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "type": "If"
+                                }
+                            },
+                            "runAfter": {
+                                "Filter_array": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach",
+                            "runtimeConfiguration": {
+                                "concurrency": {
+                                    "repetitions": 1
+                                }
+                            }
+                        },
+                        "Response": {
+                            "runAfter": {
+                                "For_each": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Response",
+                            "kind": "Http",
+                            "inputs": {
+                                "body": "@variables('output1')",
+                                "statusCode": 200
+                            }
+                        },
+                        "Temporary_variable": {
+                            "runAfter": {
+                                "Variable_to_store_input_string": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "temp",
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        },
+                        "Variable_to_store_input_string": {
+                            "runAfter": {
+                                "Variable_to_store_words_and_their_replacements": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "output1",
+                                        "type": "string",
+                                        "value": "@{triggerBody()}"
+                                    }
+                                ]
+                            }
+                        },
+                        "Variable_to_store_words_and_their_replacements": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "words",
+                                        "type": "array",
+                                        "value": "@json('[\r\n    {\r\n        \"word\": \"Google\",\r\n        \"replacement\": \"GoogleⒸ\"\r\n    },\r\n    {\r\n        \"word\": \"Oracle\",\r\n        \"replacement\": \"OracleⒸ\"\r\n    },\r\n    {\r\n        \"word\": \"Microsoft\",\r\n        \"replacement\": \"MicrosoftⒸ\"\r\n    },\r\n    {\r\n        \"word\": \"Deloitte\",\r\n        \"replacement\": \"DeloitteⒸ\"\r\n    },\r\n    {\r\n        \"word\": \"Amazon\",\r\n        \"replacement\": \"AmazonⒸ\"\r\n    }\r\n]')"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {}
+            }
+        }
+    ]
+}
